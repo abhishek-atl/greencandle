@@ -1,0 +1,9 @@
+<div class="form-group row">
+    <label class="col-lg-4 col-form-label">Enabled <span class="text-danger">*</span></label>
+    <div class="col-lg-7">
+        <label class="radio-inline mr-3">
+            <input type="radio" name="active" id="enabled_yes" value="1" @if($isEdit && $unregisterClient->active) checked @endif> Yes</label>
+        <label class="radio-inline mr-3">
+            <input type="radio" name="active" id="enabled_no" value="0" @if($isEdit && !$unregisterClient->active) checked @endif> No</label>
+    </div>
+</div>

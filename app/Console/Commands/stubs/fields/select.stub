@@ -1,0 +1,9 @@
+<div class="form-group row">
+    <label class="col-lg-4 col-form-label" for="{id}">{title} <span class="text-danger">*</span></label>
+    <div class="col-lg-6">
+        <select class="custom-select mr-sm-2" name="{id}" id="{id}">
+            <option value="">Select {title}</option>
+            {options}
+        </select>
+    </div>
+</div>

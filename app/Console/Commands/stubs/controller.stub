@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+use App\Repositories\{model}Repository;
+
+use App\Http\Requests\Store{model}Request;
+
+class {model}Controller extends Controller
+{
+
+    protected ${variable}Repository;
+
+    public function __construct(
+        {model}Repository ${variable}Repository
+    ) {
+        $this->{variable}Repository = ${variable}Repository;
+    }
+
+    public function index()
+    {
+        abort_if(!Auth::user()->hasRole('admin'), 403);
+        return view('admin.modules.{path_name}.index');
+    }
+
+    public function indexJson()
+    {
+
+        abort_if(!Auth::user()->hasRole('admin'), 403);
+
+        $params = array();
+        if (request('search')) {
+            $search = '%' . request('search') . '%';
+            $params['like'] = ['text' => $search];
+        }
+        $params['order_by'] = request('order_by') ? request('order_by') : 'id';
+        $params['order'] = request('order') ? request('order') : 'desc';
+        $params['per_page'] = config('custom.db.per_page');
+        return $this->{variable}Repository->getByParams($params);
+    }
+
+    public function add()
+    {
+        abort_if(!Auth::user()->hasRole('admin'), 403);
+        $isEdit = false;
+        ${variable} = [];
+        if (request('id')) {
+            $isEdit = true;
+            ${variable} = $this->{variable}Repository->getById(request('id'));
+        }
+        return view('admin.modules.{path_name}.add', [
+            'isEdit' => $isEdit,
+            '{variable}' => ${variable}
+        ]);
+    }
+
+    public function store(Store{model}Request $request)
+    {
+
+        abort_if(!Auth::user()->hasRole('admin'), 403);
+        $params = $request->except(['_token', 'image', 'proengsoft_jsvalidation']);
+        if ($request->id)
+            $params['id'] = $request->id;
+
+        $this->{variable}Repository->save($params);
+
+        if ($request->id)
+            $msg = '{title} has been updated successfully!';
+        else
+            $msg = '{title} has been added successfully!';
+
+        return redirect()->route('admin.{path_name}')->with('success_msg', $msg);
+    }
+
+    public function delete($id)
+    {
+        abort_if(!Auth::user()->hasRole('admin'), 403);
+        return $this->{variable}Repository->delete($id);
+    }
+}

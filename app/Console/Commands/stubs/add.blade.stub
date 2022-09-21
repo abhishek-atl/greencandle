@@ -1,0 +1,59 @@
+@extends('admin.layouts.master')
+
+@section('title') @if($isEdit) Edit @else Add @endif {title} @endsection
+
+@section('content')
+<div class="row page-titles mx-0">
+    <div class="col p-md-0">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('admin.{path_name}') }}">{title_plural}</a></li>
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">@if($isEdit) Edit @else Add @endif</a></li>
+        </ol>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header mt-3">
+            <h4 class="ml-2">@if($isEdit) Edit @else Add @endif {title}</h4>
+        </div>
+        <div class="card-body">
+            <div class="form-validation">
+                <form id="store{model}Form" action="{{ route('admin.{path_name}.store') }}" method="post">
+                    @csrf
+                    @if($isEdit)
+                    <input type="hidden" name="id" value="{{ ${variable}->id }}">
+                    @endif
+                    {fields}
+                    <div class="form-group row">
+                        <div class="col-lg-8 ml-auto">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('pageScripts')
+{!! JsValidator::formRequest('App\Http\Requests\Store{model}Request', '#store{model}Form') !!}
+<script>
+    $(document).ready(function() {
+
+        var summernoteEle = $(".summernote");
+        summernoteEle.summernote({
+            height: 150,
+            minHeight: null,
+            maxHeight: null,
+            focus: !1,
+            callbacks: {
+                onChange: function(contents, $editable) {
+                    summernoteEle.val(summernoteEle.summernote('isEmpty') ? "" : contents);
+                    summernoteEle.valid()
+                }
+            }
+        });
+    });
+</script>
+@endpush
