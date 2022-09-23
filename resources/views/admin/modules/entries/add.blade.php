@@ -1,50 +1,66 @@
 @extends('admin.layouts.master')
 
-@section('title')Add Entry
+@section('title') @if($isEdit) Edit @else Add @endif Entry @endsection
 
 @section('content')
 <div class="row page-titles mx-0">
     <div class="col p-md-0">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('admin.entries') }}">Entries</a></li>
-            <li class="breadcrumb-item active"><a href="javascript:void(0)">Add</a></li>
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">@if($isEdit) Edit @else Add @endif</a></li>
         </ol>
     </div>
 </div>
 <div class="container-fluid">
     <div class="card">
         <div class="card-header mt-3">
-            <h4 class="ml-2">Add Entry</h4>
+            <h4 class="ml-2">@if($isEdit) Edit @else Add @endif Entry</h4>
         </div>
         <div class="card-body">
             <div class="form-validation">
-                <form id="storeCustomerForm" action="{{ route('admin.entries.store') }}" method="post">
+                <form id="storeEntryForm" action="{{ route('admin.entries.store') }}" method="post">
                     @csrf
-
+                    @if($isEdit)
+                    <input type="hidden" name="id" value="{{ $entry->id }}">
+                    @endif
                     <div class="form-group row">
-                        <div class="col-lg-6"><input type="text" class="form-control" id="start_date" name="start_date" value="" placeholder="Start Date"></div>
-                        <div class="col-lg-6"><input type="text" class="form-control" id="end_date" name="end_date" value="" placeholder="End Date"></div>
+                        <label class="col-lg-4 col-form-label" for="start_date">Start Date<span class="text-danger">*</span></label>
+                        <div class="col-lg-6">
+                            <input type="text" class="form-control" id="start_date" name="start_date" value="@if($isEdit){{ Carbon\Carbon::createFromFormat('Y-m-d', $entry->start_date)->format('d/m/Y')  }}@endif">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-4 col-form-label" for="end_date">End Date<span class="text-danger">*</span></label>
+                        <div class="col-lg-6">
+                            <input type="text" class="form-control" id="end_date" name="end_date" value="@if($isEdit){{ Carbon\Carbon::createFromFormat('Y-m-d', $entry->end_date)->format('d/m/Y') }}@endif">
+
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-4 col-form-label" for="customer_id">Customer <span class="text-danger">*</span></label>
+                        <div class="col-lg-6">
+                            <select name="customer_id" class="form-control">
+                                <option value="">Select Customer</option>
+                                @foreach($customers as $customer)
+                                <option value="{{ $customer->id}}" @if($isEdit && $customer->id == $entry->customer->id) selected @endif>{{ $customer->customer_code}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-group row">
-                        <div class="col-md-4">Customer</div>
-                        <div class="col-md-4">Amount</div>
-                        <div class="col-md-4">Brokerage</div>
-                    </div>
+                        <label class="col-lg-4 col-form-label" for="amount">Amount<span class="text-danger">*</span></label>
+                        <div class="col-lg-6">
+                            <input type="text" class="form-control" id="amount" name="amount" value="@if($isEdit){{ $entry->amount ?? '' }}@endif">
 
-                    @foreach($customers as $customer)
-                    <div class="form-group row">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="customer[{{ $customer->id }}]" value="{{ $customer->customer_code }}" placeholder="End Date">
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="amount[{{ $customer->id }}]" value="">
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="brokerage[{{ $customer->id }}]" value="">
                         </div>
                     </div>
-                    @endforeach
+                    <div class="form-group row">
+                        <label class="col-lg-4 col-form-label" for="brokerage">Brokerage<span class="text-danger">*</span></label>
+                        <div class="col-lg-6">
+                            <input type="text" class="form-control" id="brokerage" name="brokerage" value="@if($isEdit){{ $entry->brokerage ?? '' }}@endif">
+                        </div>
+                    </div>
 
                     <div class="form-group row">
                         <div class="col-lg-8 ml-auto">
@@ -59,8 +75,10 @@
 @endsection
 
 @push('pageScripts')
+{!! JsValidator::formRequest('App\Http\Requests\StoreEntryRequest', '#storeEntryForm') !!}
 <script>
     $(document).ready(function() {
+
         let options = {
             format: "dd/mm/yyyy",
             calendarWeeks: true,
@@ -69,7 +87,20 @@
         }
         $('#start_date').datepicker(options);
         $('#end_date').datepicker(options);
+
+        var summernoteEle = $(".summernote");
+        summernoteEle.summernote({
+            height: 150,
+            minHeight: null,
+            maxHeight: null,
+            focus: !1,
+            callbacks: {
+                onChange: function(contents, $editable) {
+                    summernoteEle.val(summernoteEle.summernote('isEmpty') ? "" : contents);
+                    summernoteEle.valid()
+                }
+            }
+        });
     });
 </script>
-
 @endpush

@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\CustomerRepository;
-use App\Repositories\EntryRepository;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+use App\Repositories\EntryRepository;
+
+use App\Http\Requests\StoreEntryRequest;
+use App\Repositories\CustomerRepository;
+use Illuminate\Support\Carbon;
 
 class EntryController extends Controller
 {
@@ -32,7 +36,7 @@ class EntryController extends Controller
         $params = array();
         if (request('search')) {
             $search = '%' . request('search') . '%';
-            $params['like'] = ['start_date' => $search];
+            $params['like'] = ['text' => $search];
         }
         $params['order_by'] = request('order_by') ? request('order_by') : 'id';
         $params['order'] = request('order') ? request('order') : 'desc';
@@ -41,42 +45,32 @@ class EntryController extends Controller
         return $this->entryRepository->getByParams($params);
     }
 
-    public function add()
+    public function add($id = null)
     {
+        $isEdit = false;
+        $entry = [];
+        if (request('id')) {
+            $isEdit = true;
+            $entry = $this->entryRepository->getById(request('id'));
+        }
         $customers = $this->customerRepository->getByParams(['active' => 1]);
         return view('admin.modules.entries.add', [
+            'isEdit' => $isEdit,
+            'entry' => $entry,
             'customers' => $customers
         ]);
     }
 
-    public function edit($id = null)
+    public function store(StoreEntryRequest $request)
     {
-        $entries = $this->entryRepository->getBatchById(request('id'));
-        $selectedEntry = $this->entryRepository->getById(request('id'));
-        return view('admin.modules.entries.edit', [
-            'entries' => $entries,
-            'selectedEntry' => $selectedEntry
-        ]);
-    }
+        $params = $request->except(['_token', 'image', 'proengsoft_jsvalidation']);
+        if ($request->id)
+            $params['id'] = $request->id;
 
-    public function store(Request $request)
-    {
-        $params = [];
         $params['start_date'] = Carbon::createFromFormat('d/m/Y', $request->start_date);
         $params['end_date'] = Carbon::createFromFormat('d/m/Y', $request->end_date);
 
-        foreach ($request->customer as $customerKey => $customerVal) {
-
-            if ($request->amount[$customerKey]) {
-                if ($request->id && $request->id[$customerKey]) {
-                    $params['id'] = $request->id[$customerKey];
-                }
-                $params['customer_id'] = $customerKey;
-                $params['amount'] = $request->amount[$customerKey];
-                $params['brokerage'] = $request->brokerage[$customerKey] ?? 0;
-                $this->entryRepository->save($params);
-            }
-        }
+        $this->entryRepository->save($params);
 
         if ($request->id)
             $msg = 'Entry has been updated successfully!';

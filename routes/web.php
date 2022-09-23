@@ -45,9 +45,8 @@ Route::group([
         Route::get('', [EntryController::class, 'index'])->name('');
         Route::get('/index-json', [EntryController::class, 'indexJson'])->name('.indexJson');
         Route::get('/add', [EntryController::class, 'add'])->name('.add');
+        Route::get('/edit/{id?}', [EntryController::class, 'add'])->name('.edit');
         Route::post('/store', [EntryController::class, 'store'])->name('.store');
-        Route::get('/edit/{id?}', [EntryController::class, 'edit'])->name('.edit');
-
         Route::delete('/delete/{id}', [EntryController::class, 'delete'])->name('.delete');
     });
 

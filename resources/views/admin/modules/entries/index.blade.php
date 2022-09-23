@@ -10,7 +10,7 @@
         </ol>
     </div>
 </div>
-<div class="container-fluid v-cloak">
+<div class="container-fluid">
     <div class="card">
         <div class="card-header mt-3 row justify-content-between">
             <h4 class="ml-4">Entries</h4>
@@ -31,19 +31,20 @@
                             <th>Customer</th>
                             <th>Amount</th>
                             <th>Brokerage</th>
-                            <th>Total</th>
-                            <th>Actions</th>
+                            <th>Active</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(item, index) in items" :key="item.id">
-                            <td>@{{ item.id }}</td>
+                        <tr v-for="(item, index) in items" :key="index">
+                            <td>@{{ index + from }}</td>
                             <td>@{{ item.start_date}}</td>
                             <td>@{{ item.end_date}}</td>
                             <td>@{{ item.customer.customer_code}}</td>
                             <td>@{{ item.amount}}</td>
                             <td>@{{ item.brokerage}}</td>
-                            <td>@{{ item.brokerage}}</td>
+                            <td v-if="item.active">Yes</td>
+                            <td v-else>No</td>
                             <td>
                                 <a :href="'{{ route("admin.entries.edit") }}/' + item.id" type="button" class="btn mb-1 btn-rounded btn-outline-primary btn-sm"><i class="fa fa-pencil"></i></a>
                                 <a href="javascript:void(0)" type="button" class="btn mb-1 ml-3 btn-rounded btn-outline-danger btn-sm" @click="deleteConfirm(item.id)">
